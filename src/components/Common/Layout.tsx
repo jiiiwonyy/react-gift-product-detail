@@ -12,10 +12,10 @@ export default Layout;
 const Wrapper = styled.div`
   width: 100%;
   min-height: 100vh;
-  height: 100%;
+  max-width: 720px;
   display: flex;
   flex-direction: column;
-  align-items: center; /* 오타 수정 */
+  align-items: center;
   justify-content: flex-start;
   background-color: ${({ theme }) => theme.colors.backgroundDefault};
 `;

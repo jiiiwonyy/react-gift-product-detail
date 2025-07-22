@@ -1,8 +1,8 @@
-import styled from '@emotion/styled';
-import { FiUser } from 'react-icons/fi';
-import { FaChevronLeft } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
-import { useAuthContext } from '@/contexts/useAuthContext';
+import styled from "@emotion/styled";
+import { FiUser } from "react-icons/fi";
+import { FaChevronLeft } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import { useAuthContext } from "@/contexts/useAuthContext";
 
 type HeaderProps = {
   title: string;
@@ -15,9 +15,12 @@ const Header = ({ title }: HeaderProps) => {
   return (
     <HeaderWrapper>
       <HeaderContainer>
-        <FaChevronLeftIcon size={16} onClick={() => navigate('/')} />
+        <FaChevronLeftIcon size={16} onClick={() => navigate("/")} />
         <Title>{title}</Title>
-        <FiUserIcon size={24} onClick={() => navigate(isLoggedIn ? '/my' : '/login')} />
+        <FiUserIcon
+          size={24}
+          onClick={() => navigate(isLoggedIn ? "/my" : "/login")}
+        />
       </HeaderContainer>
     </HeaderWrapper>
   );
@@ -26,12 +29,13 @@ const Header = ({ title }: HeaderProps) => {
 export default Header;
 
 const HeaderWrapper = styled.div`
-  height: 56px;
+  height: 48px;
   position: sticky;
   top: 0;
   width: 100%;
   max-width: 720px;
   background-color: ${({ theme }) => theme.colors.backgroundDefault};
+  z-index: 1000;
 `;
 
 const HeaderContainer = styled.header`

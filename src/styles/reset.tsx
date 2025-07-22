@@ -138,7 +138,7 @@ const reset = (theme: Theme) => css`
   html,
   body {
     height: 100%;
-    overflow: hidden;
+    overflow: auto;
     font-family: "Pretendard", sans-serif;
     color: ${theme.colors.textDefault};
     background-color: ${theme.colors.gray100};
@@ -147,8 +147,8 @@ const reset = (theme: Theme) => css`
   #root {
     max-width: 720px;
     margin: 0 auto;
-    height: 100%;
     width: 100%;
+    height: 100%;
   }
 
   *,
