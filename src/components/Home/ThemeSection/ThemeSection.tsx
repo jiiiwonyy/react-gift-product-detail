@@ -1,5 +1,3 @@
-import type { ThemeType } from "@/types/theme";
-import { useCallback } from "react";
 import { SectionContainer, SectionTitle } from "../../Common/SectionLayout";
 import { getThemes } from "@/api/themes";
 import styled from "@emotion/styled";
@@ -7,11 +5,14 @@ import ThemeItem from "./ThemeItem";
 import { LoadingSpinner } from "@/components/Common/LoadingSpinner";
 import { useFetchData } from "@/hooks/useFetchData";
 import { useNavigate } from "react-router-dom";
+import type { ThemeType } from "@/types/theme";
 
 const ThemeSection = () => {
-  const fetchFn = useCallback(() => getThemes(), []);
+  const { data, loading, error } = useFetchData<{ data: ThemeType[] }, void>({
+    fetchFn: getThemes,
+    initFetchParams: undefined as void,
+  });
 
-  const { data, loading, error } = useFetchData<ThemeType[]>(fetchFn);
   const navigate = useNavigate();
 
   const handleClickTheme = (themeId: number) => {
@@ -29,7 +30,7 @@ const ThemeSection = () => {
         <LoadingSpinner color="#000000" loading={loading} size={35} />
       ) : (
         <ThemeGrid>
-          {(data ?? []).map((t) => (
+          {(data?.data ?? []).map((t) => (
             <ThemeItem
               key={t.themeId}
               name={t.name}

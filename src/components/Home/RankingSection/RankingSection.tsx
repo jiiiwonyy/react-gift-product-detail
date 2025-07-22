@@ -2,7 +2,7 @@ import TargetCategory from "./TargetCategory";
 import RankingCategory from "./RankingCategory";
 import ProductItem from "@/components/Common/ProductItem";
 import styled from "@emotion/styled";
-import { useCallback, useState } from "react";
+import { useState, useMemo } from "react";
 import {
   SectionContainer,
   SectionTitle,
@@ -10,9 +10,9 @@ import {
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useAuthContext } from "@/contexts/useAuthContext";
 import { getRanking } from "@/api/products";
-import type { BasicGiftProduct } from "@/types/gift";
 import { LoadingSpinner } from "@/components/Common/LoadingSpinner";
 import { useFetchData } from "@/hooks/useFetchData";
+import type { BasicGiftProduct } from "@/types/gift";
 
 const RankingSection = () => {
   const [showAll, setShowAll] = useState(false);
@@ -29,6 +29,11 @@ const RankingSection = () => {
 
   const targetType = searchParams.get("targetType") || "ALL";
   const rankType = searchParams.get("rankType") || "MANY_WISH";
+
+  const rankingParams = useMemo(
+    () => ({ targetType, rankType }),
+    [targetType, rankType]
+  );
 
   const handleGenderChange = (newTarget: string) => {
     setSearchParams((prev) => {
@@ -56,12 +61,18 @@ const RankingSection = () => {
     }
   };
 
-  const fetchFn = useCallback(
-    () => getRanking(targetType, rankType),
-    [targetType, rankType]
-  );
+  // const { data, loading, error } = useFetchData({
+  //   fetchFn: getRanking,
+  //   initFetchParams: { targetType, rankType },
+  // });
 
-  const { data, loading, error } = useFetchData<BasicGiftProduct[]>(fetchFn);
+  const { data, loading, error } = useFetchData<
+    { data: BasicGiftProduct[] },
+    typeof rankingParams
+  >({
+    fetchFn: getRanking,
+    initFetchParams: rankingParams,
+  });
 
   if (error) {
     return (
@@ -78,14 +89,14 @@ const RankingSection = () => {
       <RankingCategory selected={rankType} onChange={handleCategoryChange} />
       {loading ? (
         <LoadingSpinner color="#000000" loading={loading} size={35} />
-      ) : data?.length === 0 ? (
+      ) : data?.data.length === 0 ? (
         <ErrorMessage>
           <>상품이 없습니다.</>
         </ErrorMessage>
       ) : (
         <>
           <RankingGrid>
-            {data?.slice(0, RANK_COUNT).map((item, index) => (
+            {data?.data.slice(0, RANK_COUNT).map((item, index) => (
               <ProductItem
                 key={item.id}
                 rank={index + 1}

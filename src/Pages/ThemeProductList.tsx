@@ -3,21 +3,15 @@ import Layout from "@/components/Common/Layout";
 import { SectionContainer } from "@/components/Common/SectionLayout";
 import styled from "@emotion/styled";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import { useCallback, useEffect, useState, useRef } from "react";
+import { useCallback, useEffect, useState, useRef, useMemo } from "react";
 import { getThemesDetail, getThemesList } from "@/api/themes";
 import { useFetchData } from "@/hooks/useFetchData";
 import type { BasicGiftProduct } from "@/types/gift";
 import { LoadingSpinner } from "@/components/Common/LoadingSpinner";
 import { toast } from "react-toastify";
-import type { ThemeInfo } from "@/types/theme";
 import ProductItem from "@/components/Common/ProductItem";
 import { useAuthContext } from "@/contexts/useAuthContext";
-
-type ThemeProductsResponse = {
-  list: BasicGiftProduct[];
-  cursor: number;
-  hasMoreList: boolean;
-};
+import type { ThemeProductsResponse } from "@/types/theme";
 
 const ThemeProductList = () => {
   const { themeId } = useParams<{ themeId: string }>();
@@ -31,25 +25,25 @@ const ThemeProductList = () => {
   const location = useLocation();
   const isDirectEnter = location.key === "default";
 
-  const fetchThemeInfo = useCallback(async () => {
-    const res = await getThemesDetail(Number(themeId));
-    return { data: { data: res.data.data } };
-  }, [themeId]);
+  const { data: themeInfo, loading: heroLoading } = useFetchData({
+    fetchFn: getThemesDetail,
+    initFetchParams: Number(themeId),
+  });
 
-  const { data: themeInfo, loading: heroLoading } =
-    useFetchData<ThemeInfo>(fetchThemeInfo);
-
-  const fetchFn = useCallback(async () => {
-    const res = await getThemesList(Number(themeId), 0, 10);
-    return { data: { data: res.data.data } };
-  }, [themeId]);
+  const initialListParams = useMemo(
+    () => ({ themeId: Number(themeId), cursor: 0, limit: 10 }),
+    [themeId]
+  );
 
   const {
     data: initialData,
     loading: listLoading,
     error,
     errorStatus,
-  } = useFetchData<ThemeProductsResponse>(fetchFn);
+  } = useFetchData<ThemeProductsResponse, typeof initialListParams>({
+    fetchFn: getThemesList,
+    initFetchParams: initialListParams,
+  });
 
   useEffect(() => {
     if (errorStatus === 404) {
@@ -69,8 +63,12 @@ const ThemeProductList = () => {
   }, [initialData]);
 
   const loadMore = useCallback(async () => {
-    const res = await getThemesList(Number(themeId), cursor, 10);
-    const data = res.data.data;
+    const res = await getThemesList({
+      themeId: Number(themeId),
+      cursor,
+      limit: 10,
+    });
+    const data = res.data;
     setProducts((prev) => [...prev, ...data.list]);
     setCursor(data.cursor);
     setHasMore(data.hasMoreList);

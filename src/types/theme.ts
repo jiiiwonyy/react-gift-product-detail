@@ -1,3 +1,5 @@
+import type { BasicGiftProduct } from "@/types/gift";
+
 export type ThemeType = {
   themeId: number;
   name: string;
@@ -15,4 +17,10 @@ export type ThemeInfo = {
   title: string;
   description: string;
   backgroundColor: string;
+};
+
+export type ThemeProductsResponse = {
+  list: BasicGiftProduct[];
+  cursor: number;
+  hasMoreList: boolean;
 };

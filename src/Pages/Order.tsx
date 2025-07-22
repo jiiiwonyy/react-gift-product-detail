@@ -5,7 +5,7 @@ import { SectionContainer } from "@/components/Common/SectionLayout";
 import CardList from "@/components/Order/CardList";
 import { useCardSelection } from "@/hooks/useCardSelection";
 import { useParams, useNavigate } from "react-router-dom";
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import ReceiverListModal from "@/components/Order/ReceiverListModal";
 import {
   InputWrapper,
@@ -17,7 +17,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { OrderSchema } from "@/schema/order";
 import type { Receiver } from "@/schema/receiver";
 import type { OrderType } from "@/schema/order";
-import type { SummaryGiftProduct } from "@/types/gift";
 import { getProudctSummary } from "@/api/products";
 import { useAuthContext } from "@/contexts/useAuthContext";
 import axios from "axios";
@@ -33,11 +32,10 @@ const Order = () => {
   const { user } = useAuthContext();
   const navigate = useNavigate();
 
-  const fetchFn = useCallback(
-    () => getProudctSummary(Number(productId)),
-    [productId]
-  );
-  const { data: item, loading } = useFetchData<SummaryGiftProduct>(fetchFn);
+  const { data: item, loading } = useFetchData({
+    fetchFn: getProudctSummary,
+    initFetchParams: Number(productId),
+  });
 
   const {
     register,
