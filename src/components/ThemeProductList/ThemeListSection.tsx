@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { SectionContainer } from "../Common/SectionLayout";
 import { LoadingSpinner } from "../Common/LoadingSpinner";
 import ProductItem from "../Common/ProductItem";
@@ -9,20 +9,22 @@ import { useFetchData } from "@/hooks/useFetchData";
 import type { BasicGiftProduct } from "@/types/gift";
 import type { ThemeProductsResponse } from "@/types/theme";
 import { useAuthContext } from "@/contexts/useAuthContext";
-
 import { toast } from "react-toastify";
 
-const ThemeListSection = () => {
-  const { themeId } = useParams<{ themeId: string }>();
+type Props = {
+  themeId: string;
+};
+
+const ThemeListSection = ({ themeId }: Props) => {
+  const { user } = useAuthContext();
+  const isLoggedIn = !!user;
+  const navigate = useNavigate();
+
   const [products, setProducts] = useState<BasicGiftProduct[]>([]);
   const [cursor, setCursor] = useState(0);
   const [hasMore, setHasMore] = useState(true);
 
   const loaderRef = useRef<HTMLDivElement | null>(null);
-
-  const { user } = useAuthContext();
-  const isLoggedIn = !!user;
-  const navigate = useNavigate();
 
   const location = useLocation();
   const isDirectEnter = location.key === "default";
@@ -37,6 +39,7 @@ const ThemeListSection = () => {
     loading: listLoading,
     error,
     errorStatus,
+    refetch,
   } = useFetchData<ThemeProductsResponse, typeof initialListParams>({
     fetchFn: getThemesList,
     initFetchParams: initialListParams,
@@ -52,29 +55,28 @@ const ThemeListSection = () => {
   }, [errorStatus, isDirectEnter, navigate]);
 
   useEffect(() => {
-    if (initialData) {
-      setProducts(initialData.list);
-      setCursor(initialData.cursor);
-      setHasMore(initialData.hasMoreList);
-    }
+    if (!initialData) return;
+    setCursor(initialData.cursor);
+    setHasMore(initialData.hasMoreList);
+
+    setProducts((prev) => {
+      const existingIds = new Set(prev.map((p) => p.id));
+      const filtered = initialData.list.filter(
+        (item) => !existingIds.has(item.id)
+      );
+      return [...prev, ...filtered];
+    });
   }, [initialData]);
 
-  const loadMore = useCallback(async () => {
-    const res = await getThemesList({
-      themeId: Number(themeId),
-      cursor,
-      limit: 10,
-    });
-    const data = res.data;
-    setProducts((prev) => [...prev, ...data.list]);
-    setCursor(data.cursor);
-    setHasMore(data.hasMoreList);
-  }, [themeId, cursor]);
+  const loadMore = useCallback(() => {
+    if (!hasMore) return;
+    refetch({ themeId: Number(themeId), cursor, limit: 10 });
+  }, [hasMore, refetch, themeId, cursor]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasMore) {
+      ([entry]) => {
+        if (entry.isIntersecting && hasMore) {
           loadMore();
         }
       },
@@ -99,31 +101,39 @@ const ThemeListSection = () => {
     }
   };
 
+  if (listLoading && products.length === 0) {
+    return (
+      <SectionContainer>
+        <LoadingSpinner color="#000000" loading={listLoading} size={35} />
+      </SectionContainer>
+    );
+  }
+
+  if (!products || products.length === 0) {
+    return (
+      <SectionContainer>
+        <ErrorMessage>상품이 없습니다.</ErrorMessage>
+      </SectionContainer>
+    );
+  }
+
   if (error) return <ErrorMessage>{error}</ErrorMessage>;
 
   return (
     <SectionContainer>
-      {listLoading ? (
-        <LoadingSpinner color="#000000" loading={listLoading} size={35} />
-      ) : products?.length === 0 ? (
-        <ErrorMessage>
-          <>상품이 없습니다.</>
-        </ErrorMessage>
-      ) : (
-        <ProudctList>
-          {(products ?? []).map((product) => (
-            <ProductItem
-              key={product.id}
-              id={product.id}
-              name={product.name}
-              imageURL={product.imageURL}
-              price={product.price}
-              brandInfo={product.brandInfo}
-              onClick={() => handleClickItem(product.id)}
-            />
-          ))}
-        </ProudctList>
-      )}
+      <ProudctList>
+        {products.map((product) => (
+          <ProductItem
+            key={product.id}
+            id={product.id}
+            name={product.name}
+            imageURL={product.imageURL}
+            price={product.price}
+            brandInfo={product.brandInfo}
+            onClick={() => handleClickItem(product.id)}
+          />
+        ))}
+      </ProudctList>
       {hasMore && (
         <LoadingSpinner
           color="#000000"

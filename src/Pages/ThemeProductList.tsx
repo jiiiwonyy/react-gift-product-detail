@@ -10,7 +10,7 @@ import HeroBannerSection from "@/components/ThemeProductList/HeroBannerSection";
 import ThemeListSection from "@/components/ThemeProductList/ThemeListSection";
 
 const ThemeProductList = () => {
-  const { themeId } = useParams<{ themeId: string }>();
+  const { themeId = "" } = useParams<{ themeId: string }>();
 
   const { data: themeInfo, loading: heroLoading } = useFetchData({
     fetchFn: getThemesDetail,
@@ -25,7 +25,7 @@ const ThemeProductList = () => {
         {heroLoading ? (
           <LoadingSpinner color="#000000" loading={heroLoading} size={35} />
         ) : (
-          <ThemeListSection />
+          <ThemeListSection themeId={themeId} />
         )}
       </ListContainer>
     </Layout>
