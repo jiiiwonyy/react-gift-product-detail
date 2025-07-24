@@ -12,6 +12,7 @@ import { toast } from "react-toastify";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
 import { useInView } from "react-intersection-observer";
+import axios from "axios";
 
 type Props = {
   themeId: string;
@@ -47,7 +48,7 @@ const ThemeListSection = ({ themeId }: Props) => {
   });
 
   useEffect(() => {
-    if (isError) {
+    if (axios.isAxiosError(error) && isError) {
       if (error.response?.status === 404 && isDirectEnter) {
         toast.error("해당 ID에 일치하는 데이터가 없습니다.");
       }
