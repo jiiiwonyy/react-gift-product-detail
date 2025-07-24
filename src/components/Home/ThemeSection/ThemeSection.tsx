@@ -3,14 +3,14 @@ import { getThemes } from "@/api/themes";
 import styled from "@emotion/styled";
 import ThemeItem from "./ThemeItem";
 import { LoadingSpinner } from "@/components/Common/LoadingSpinner";
-import { useFetchData } from "@/hooks/useFetchData";
 import { useNavigate } from "react-router-dom";
 import type { ThemeType } from "@/types/theme";
+import { useQuery } from "@tanstack/react-query";
 
 const ThemeSection = () => {
-  const { data, loading, error } = useFetchData<{ data: ThemeType[] }, void>({
-    fetchFn: getThemes,
-    initFetchParams: undefined as void,
+  const { data, isLoading, isError } = useQuery<ThemeType[], void>({
+    queryKey: ["themes"],
+    queryFn: getThemes,
   });
 
   const navigate = useNavigate();
@@ -19,18 +19,18 @@ const ThemeSection = () => {
     navigate(`/themes/${themeId}`);
   };
 
-  if (error) {
+  if (isError) {
     return <></>;
   }
 
   return (
     <SectionContainer>
       <SectionTitle>선물 테마</SectionTitle>
-      {loading ? (
-        <LoadingSpinner color="#000000" loading={loading} size={35} />
+      {isLoading ? (
+        <LoadingSpinner color="#000000" loading={isLoading} size={35} />
       ) : (
         <ThemeGrid>
-          {(data?.data ?? []).map((t) => (
+          {(data ?? []).map((t) => (
             <ThemeItem
               key={t.themeId}
               name={t.name}

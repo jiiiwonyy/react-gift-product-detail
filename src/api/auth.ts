@@ -1,5 +1,4 @@
 import instance from "./axiosInstance";
-import type { AxiosResponse } from "axios";
 
 interface LoginRequest {
   email: string;
@@ -14,6 +13,6 @@ interface LoginResponse {
 
 export const postLogin = (
   data: LoginRequest
-): Promise<AxiosResponse<{ data: LoginResponse }>> => {
+): Promise<{ data: LoginResponse }> => {
   return instance.post("/login", data);
 };

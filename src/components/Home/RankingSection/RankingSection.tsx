@@ -11,7 +11,7 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { useAuthContext } from "@/contexts/useAuthContext";
 import { getRanking } from "@/api/products";
 import { LoadingSpinner } from "@/components/Common/LoadingSpinner";
-import { useFetchData } from "@/hooks/useFetchData";
+import { useQuery } from "@tanstack/react-query";
 import type { BasicGiftProduct } from "@/types/gift";
 
 const RankingSection = () => {
@@ -34,6 +34,11 @@ const RankingSection = () => {
     () => ({ targetType, rankType }),
     [targetType, rankType]
   );
+
+  const { data, isLoading, isError } = useQuery<BasicGiftProduct[]>({
+    queryKey: ["rankingData", rankingParams],
+    queryFn: () => getRanking(rankingParams),
+  });
 
   const handleGenderChange = (newTarget: string) => {
     setSearchParams((prev) => {
@@ -61,15 +66,7 @@ const RankingSection = () => {
     }
   };
 
-  const { data, loading, error } = useFetchData<
-    { data: BasicGiftProduct[] },
-    typeof rankingParams
-  >({
-    fetchFn: getRanking,
-    initFetchParams: rankingParams,
-  });
-
-  if (error) {
+  if (isError) {
     return (
       <ErrorMessage>
         <>상품이 없습니다.</>
@@ -82,16 +79,16 @@ const RankingSection = () => {
       <SectionTitle>실시간 급상승 선물랭킹</SectionTitle>
       <TargetCategory selected={targetType} onChange={handleGenderChange} />
       <RankingCategory selected={rankType} onChange={handleCategoryChange} />
-      {loading ? (
-        <LoadingSpinner color="#000000" loading={loading} size={35} />
-      ) : data?.data.length === 0 ? (
+      {isLoading ? (
+        <LoadingSpinner color="#000000" loading={isLoading} size={35} />
+      ) : data?.length === 0 ? (
         <ErrorMessage>
           <>상품이 없습니다.</>
         </ErrorMessage>
       ) : (
         <>
           <RankingGrid>
-            {data?.data.slice(0, RANK_COUNT).map((item, index) => (
+            {data?.slice(0, RANK_COUNT).map((item, index) => (
               <ProductItem
                 key={item.id}
                 rank={index + 1}
