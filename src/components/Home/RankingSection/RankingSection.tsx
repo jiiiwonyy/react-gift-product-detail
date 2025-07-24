@@ -61,11 +61,6 @@ const RankingSection = () => {
     }
   };
 
-  // const { data, loading, error } = useFetchData({
-  //   fetchFn: getRanking,
-  //   initFetchParams: { targetType, rankType },
-  // });
-
   const { data, loading, error } = useFetchData<
     { data: BasicGiftProduct[] },
     typeof rankingParams
