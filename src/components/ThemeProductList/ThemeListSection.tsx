@@ -31,6 +31,7 @@ const ThemeListSection = ({ themeId }: Props) => {
     fetchNextPage,
     hasNextPage,
     isLoading: listLoading,
+    isFetchingNextPage,
     error,
     isError,
   } = useInfiniteQuery<ThemeProductsResponse, AxiosError>({
@@ -57,10 +58,10 @@ const ThemeListSection = ({ themeId }: Props) => {
   }, [isError, error, isDirectEnter, navigate]);
 
   useEffect(() => {
-    if (inView && hasNextPage) {
+    if (inView && hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }
-  }, [inView, hasNextPage, fetchNextPage]);
+  }, [inView, hasNextPage, fetchNextPage, isFetchingNextPage]);
 
   const products: BasicGiftProduct[] =
     data?.pages.flatMap((page) => page.list) ?? [];
