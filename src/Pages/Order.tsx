@@ -25,7 +25,7 @@ import { LoadingSpinner } from "@/components/Common/LoadingSpinner";
 import Layout from "@/components/Common/Layout";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import axios from "axios";
-import { queryKeys } from "@/queries/queryKeys";
+import { queryKeys } from "@/utils/queryKeys";
 
 const Order = () => {
   const { selectedCard, selectCard } = useCardSelection();

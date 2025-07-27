@@ -7,12 +7,13 @@ import { LoadingSpinner } from "@/components/Common/LoadingSpinner";
 import HeroBannerSection from "@/components/ThemeProductList/HeroBannerSection";
 import ThemeListSection from "@/components/ThemeProductList/ThemeListSection";
 import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "@/utils/queryKeys";
 
 const ThemeProductList = () => {
   const { themeId = "" } = useParams<{ themeId: string }>();
 
   const { data: themeInfo, isLoading: heroLoading } = useQuery({
-    queryKey: ["themeInfo", themeId],
+    queryKey: queryKeys.infiniteThemeId(Number(themeId)),
     queryFn: () => getThemesDetail(Number(themeId)),
     enabled: !!themeId,
   });
