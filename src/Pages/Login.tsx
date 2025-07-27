@@ -18,7 +18,7 @@ const Login = () => {
   const { email, password, isFormValid } = useLoginForm();
   const { login } = useAuthContext();
 
-  const loginMutaqtion = useMutation({
+  const loginMutation = useMutation({
     mutationFn: postLogin,
     onSuccess: (res) => {
       login(res);
@@ -34,7 +34,7 @@ const Login = () => {
   });
 
   const handleLogin = async () => {
-    loginMutaqtion.mutate({
+    loginMutation.mutate({
       email: email.value,
       password: password.value,
     });
