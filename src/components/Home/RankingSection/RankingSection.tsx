@@ -66,7 +66,7 @@ const RankingSection = () => {
     }
   };
 
-  if (isError) {
+  if (isError || data?.length === 0) {
     return (
       <ErrorMessage>
         <>상품이 없습니다.</>
@@ -74,38 +74,32 @@ const RankingSection = () => {
     );
   }
 
+  if (isLoading) {
+    return <LoadingSpinner color="#000000" loading={isLoading} size={35} />;
+  }
+
   return (
     <SectionContainer>
       <SectionTitle>실시간 급상승 선물랭킹</SectionTitle>
       <TargetCategory selected={targetType} onChange={handleGenderChange} />
       <RankingCategory selected={rankType} onChange={handleCategoryChange} />
-      {isLoading ? (
-        <LoadingSpinner color="#000000" loading={isLoading} size={35} />
-      ) : data?.length === 0 ? (
-        <ErrorMessage>
-          <>상품이 없습니다.</>
-        </ErrorMessage>
-      ) : (
-        <>
-          <RankingGrid>
-            {data?.slice(0, RANK_COUNT).map((item, index) => (
-              <ProductItem
-                key={item.id}
-                rank={index + 1}
-                id={item.id}
-                name={item.name}
-                imageURL={item.imageURL}
-                price={item.price}
-                brandInfo={item.brandInfo}
-                onClick={() => handleClickItem(item.id)}
-              />
-            ))}
-          </RankingGrid>
-          <MoreButton onClick={toggleShowAll}>
-            {showAll ? "접기" : "더보기"}
-          </MoreButton>
-        </>
-      )}
+      <RankingGrid>
+        {data?.slice(0, RANK_COUNT).map((item, index) => (
+          <ProductItem
+            key={item.id}
+            rank={index + 1}
+            id={item.id}
+            name={item.name}
+            imageURL={item.imageURL}
+            price={item.price}
+            brandInfo={item.brandInfo}
+            onClick={() => handleClickItem(item.id)}
+          />
+        ))}
+      </RankingGrid>
+      <MoreButton onClick={toggleShowAll}>
+        {showAll ? "접기" : "더보기"}
+      </MoreButton>
     </SectionContainer>
   );
 };
