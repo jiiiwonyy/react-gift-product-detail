@@ -25,6 +25,7 @@ import { LoadingSpinner } from "@/components/Common/LoadingSpinner";
 import Layout from "@/components/Common/Layout";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import axios from "axios";
+import { queryKeys } from "@/queries/queryKeys";
 
 const Order = () => {
   const { selectedCard, selectCard } = useCardSelection();
@@ -37,7 +38,7 @@ const Order = () => {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["productSummary", productId],
+    queryKey: queryKeys.productId(Number(productId)),
     queryFn: () => getProudctSummary(Number(productId)),
     enabled: !!productId,
     retry: false,

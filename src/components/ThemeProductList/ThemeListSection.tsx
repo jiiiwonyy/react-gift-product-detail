@@ -11,6 +11,7 @@ import { useAuthContext } from "@/contexts/useAuthContext";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
 import { useInView } from "react-intersection-observer";
+import { queryKeys } from "@/queries/queryKeys";
 
 type Props = {
   themeId: string;
@@ -30,7 +31,7 @@ const ThemeListSection = ({ themeId }: Props) => {
     isFetchingNextPage,
     error,
   } = useInfiniteQuery<ThemeProductsResponse, AxiosError>({
-    queryKey: ["themes", themeId],
+    queryKey: queryKeys.themeId(Number(themeId)),
     queryFn: ({ pageParam = 0 }) =>
       getThemesList({
         themeId: Number(themeId),
