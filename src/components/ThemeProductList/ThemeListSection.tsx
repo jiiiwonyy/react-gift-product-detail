@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { SectionContainer } from "../Common/SectionLayout";
 import { LoadingSpinner } from "../Common/LoadingSpinner";
 import ProductItem from "../Common/ProductItem";
@@ -8,11 +8,9 @@ import { getThemesList } from "@/api/themes";
 import type { BasicGiftProduct } from "@/types/gift";
 import type { ThemeProductsResponse } from "@/types/theme";
 import { useAuthContext } from "@/contexts/useAuthContext";
-import { toast } from "react-toastify";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
 import { useInView } from "react-intersection-observer";
-import axios from "axios";
 
 type Props = {
   themeId: string;
@@ -23,8 +21,6 @@ const ThemeListSection = ({ themeId }: Props) => {
   const isLoggedIn = !!user;
   const navigate = useNavigate();
   const { ref: loaderRef, inView } = useInView({ threshold: 1.0 });
-  const location = useLocation();
-  const isDirectEnter = location.key === "default";
 
   const {
     data,
@@ -33,7 +29,6 @@ const ThemeListSection = ({ themeId }: Props) => {
     isLoading: listLoading,
     isFetchingNextPage,
     error,
-    isError,
   } = useInfiniteQuery<ThemeProductsResponse, AxiosError>({
     queryKey: ["themes", themeId],
     queryFn: ({ pageParam = 0 }) =>
@@ -49,13 +44,14 @@ const ThemeListSection = ({ themeId }: Props) => {
   });
 
   useEffect(() => {
-    if (axios.isAxiosError(error) && isError) {
-      if (error.response?.status === 404 && isDirectEnter) {
-        toast.error("해당 ID에 일치하는 데이터가 없습니다.");
+    if (error) {
+      if (error.response?.status === 404) {
+        navigate("/");
+      } else if (error.response?.status === 401) {
+        navigate("/login");
       }
-      navigate("/");
     }
-  }, [isError, error, isDirectEnter, navigate]);
+  }, [error, navigate]);
 
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {

@@ -19,12 +19,12 @@ import type { Receiver } from "@/schema/receiver";
 import type { OrderType } from "@/schema/order";
 import { getProudctSummary } from "@/api/products";
 import { useAuthContext } from "@/contexts/useAuthContext";
-import axios from "axios";
 import { toast } from "react-toastify";
 import { postOrder } from "@/api/order";
 import { LoadingSpinner } from "@/components/Common/LoadingSpinner";
 import Layout from "@/components/Common/Layout";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import axios from "axios";
 
 const Order = () => {
   const { selectedCard, selectCard } = useCardSelection();
@@ -35,25 +35,26 @@ const Order = () => {
   const {
     data: item,
     isLoading,
-    isError,
     error,
   } = useQuery({
     queryKey: ["productSummary", productId],
     queryFn: () => getProudctSummary(Number(productId)),
     enabled: !!productId,
+    retry: false,
   });
 
   useEffect(() => {
-    if (axios.isAxiosError(error) && isError) {
-      if (error.response?.status === 404) {
-        navigate("/");
-        toast.error("해당 ID에 일치하는 데이터가 없습니다.");
-      } else if (error.response?.status === 401) {
-        navigate("/login");
-        toast.error("로그인이 필요합니다.");
+    if (error) {
+      // error 객체가 존재하면 (에러가 발생하면)
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 404) {
+          navigate("/");
+        } else if (error.response?.status === 401) {
+          navigate("/login");
+        }
       }
     }
-  }, [error, isError, navigate]);
+  }, [error, navigate]);
 
   const {
     register,
