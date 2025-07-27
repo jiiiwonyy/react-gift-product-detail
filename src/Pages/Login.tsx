@@ -19,15 +19,9 @@ const Login = () => {
   const { login } = useAuthContext();
 
   const loginMutaqtion = useMutation({
-    mutationFn: (params: { email: string; password: string }) =>
-      postLogin(params),
+    mutationFn: postLogin,
     onSuccess: (res) => {
-      const data = res.data;
-      login({
-        authToken: data.authToken,
-        email: data.email,
-        name: data.name,
-      });
+      login(res);
       navigate(from, { replace: true });
     },
     onError: (error) => {

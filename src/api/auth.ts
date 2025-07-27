@@ -11,8 +11,7 @@ interface LoginResponse {
   authToken: string;
 }
 
-export const postLogin = (
-  data: LoginRequest
-): Promise<{ data: LoginResponse }> => {
-  return instance.post("/login", data);
+export const postLogin = async (data: LoginRequest): Promise<LoginResponse> => {
+  const res = await instance.post<{ data: LoginResponse }>("/login", data);
+  return res.data.data; // { email, name, authToken }
 };
