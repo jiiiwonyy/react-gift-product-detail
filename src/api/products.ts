@@ -1,28 +1,26 @@
 import type { BasicGiftProduct, SummaryGiftProduct } from "@/types/gift";
 import instance from "./axiosInstance";
-import type { AxiosResponse } from "axios";
 
 type GetRankProductsParams = {
   targetType: string;
   rankType: string;
 };
 
-export const getRanking = (
+export const getRanking = async (
   params: GetRankProductsParams
-): Promise<AxiosResponse<{ data: BasicGiftProduct[] }>> => {
-  return instance.get("/products/ranking", {
-    params: { targetType: params.targetType, rankType: params.rankType },
-  });
+): Promise<BasicGiftProduct[]> => {
+  const res = await instance.get<{ data: BasicGiftProduct[] }>(
+    "/products/ranking",
+    { params }
+  );
+  return res.data.data;
 };
 
 export const getProudctSummary = async (
   productId: number
-): Promise<AxiosResponse<SummaryGiftProduct>> => {
+): Promise<SummaryGiftProduct> => {
   const res = await instance.get<{ data: SummaryGiftProduct }>(
     `/products/${productId}/summary`
   );
-  return {
-    ...res,
-    data: res.data.data,
-  } as AxiosResponse<SummaryGiftProduct>;
+  return res.data.data;
 };

@@ -1,5 +1,4 @@
 import instance from "./axiosInstance";
-import type { AxiosResponse } from "axios";
 
 interface LoginRequest {
   email: string;
@@ -12,8 +11,7 @@ interface LoginResponse {
   authToken: string;
 }
 
-export const postLogin = (
-  data: LoginRequest
-): Promise<AxiosResponse<{ data: LoginResponse }>> => {
-  return instance.post("/login", data);
+export const postLogin = async (data: LoginRequest): Promise<LoginResponse> => {
+  const res = await instance.post<{ data: LoginResponse }>("/login", data);
+  return res.data.data; // { email, name, authToken }
 };

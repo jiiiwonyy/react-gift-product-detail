@@ -1,15 +1,17 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { SectionContainer } from "../Common/SectionLayout";
 import { LoadingSpinner } from "../Common/LoadingSpinner";
 import ProductItem from "../Common/ProductItem";
 import styled from "@emotion/styled";
 import { getThemesList } from "@/api/themes";
-import { useFetchData } from "@/hooks/useFetchData";
 import type { BasicGiftProduct } from "@/types/gift";
 import type { ThemeProductsResponse } from "@/types/theme";
 import { useAuthContext } from "@/contexts/useAuthContext";
-import { toast } from "react-toastify";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import type { AxiosError } from "axios";
+import { useInView } from "react-intersection-observer";
+import { queryKeys } from "@/utils/queryKeys";
 
 type Props = {
   themeId: string;
@@ -19,77 +21,47 @@ const ThemeListSection = ({ themeId }: Props) => {
   const { user } = useAuthContext();
   const isLoggedIn = !!user;
   const navigate = useNavigate();
-
-  const [products, setProducts] = useState<BasicGiftProduct[]>([]);
-  const [cursor, setCursor] = useState(0);
-  const [hasMore, setHasMore] = useState(true);
-
-  const loaderRef = useRef<HTMLDivElement | null>(null);
-
-  const location = useLocation();
-  const isDirectEnter = location.key === "default";
-
-  const initialListParams = useMemo(
-    () => ({ themeId: Number(themeId), cursor: 0, limit: 10 }),
-    [themeId]
-  );
+  const { ref: loaderRef, inView } = useInView({ threshold: 1.0 });
 
   const {
-    data: initialData,
-    loading: listLoading,
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isLoading: listLoading,
+    isFetchingNextPage,
     error,
-    errorStatus,
-    refetch,
-  } = useFetchData<ThemeProductsResponse, typeof initialListParams>({
-    fetchFn: getThemesList,
-    initFetchParams: initialListParams,
+  } = useInfiniteQuery<ThemeProductsResponse, AxiosError>({
+    queryKey: queryKeys.themeId(Number(themeId)),
+    queryFn: ({ pageParam = 0 }) =>
+      getThemesList({
+        themeId: Number(themeId),
+        cursor: pageParam as number,
+        limit: 10,
+      }),
+    initialPageParam: 0,
+    enabled: !!themeId,
+    getNextPageParam: (lastPage) =>
+      lastPage.hasMoreList ? lastPage.cursor : undefined,
   });
 
   useEffect(() => {
-    if (errorStatus === 404) {
-      if (isDirectEnter) {
-        toast.error("해당 ID에 일치하는 데이터가 없습니다.");
+    if (error) {
+      if (error.response?.status === 404) {
+        navigate("/");
+      } else if (error.response?.status === 401) {
+        navigate("/login");
       }
-      navigate("/");
     }
-  }, [errorStatus, isDirectEnter, navigate]);
+  }, [error, navigate]);
 
   useEffect(() => {
-    if (!initialData) return;
-    setCursor(initialData.cursor);
-    setHasMore(initialData.hasMoreList);
+    if (inView && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [inView, hasNextPage, fetchNextPage, isFetchingNextPage]);
 
-    setProducts((prev) => {
-      const existingIds = new Set(prev.map((p) => p.id));
-      const filtered = initialData.list.filter(
-        (item) => !existingIds.has(item.id)
-      );
-      return [...prev, ...filtered];
-    });
-  }, [initialData]);
-
-  const loadMore = useCallback(() => {
-    if (!hasMore) return;
-    refetch({ themeId: Number(themeId), cursor, limit: 10 });
-  }, [hasMore, refetch, themeId, cursor]);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && hasMore) {
-          loadMore();
-        }
-      },
-      { threshold: 1.0 }
-    );
-
-    const currentLoader = loaderRef.current;
-    if (currentLoader) observer.observe(currentLoader);
-
-    return () => {
-      if (currentLoader) observer.unobserve(currentLoader);
-    };
-  }, [hasMore, loadMore]);
+  const products: BasicGiftProduct[] =
+    data?.pages.flatMap((page) => page.list) ?? [];
 
   const handleClickItem = (productId: number) => {
     if (!isLoggedIn) {
@@ -117,8 +89,6 @@ const ThemeListSection = ({ themeId }: Props) => {
     );
   }
 
-  if (error) return <ErrorMessage>{error}</ErrorMessage>;
-
   return (
     <SectionContainer>
       <ProudctList>
@@ -134,7 +104,7 @@ const ThemeListSection = ({ themeId }: Props) => {
           />
         ))}
       </ProudctList>
-      {hasMore && (
+      {hasNextPage && (
         <LoadingSpinner
           color="#000000"
           loading={true}

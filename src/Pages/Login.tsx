@@ -8,6 +8,7 @@ import { useAuthContext } from "@/contexts/useAuthContext";
 import { postLogin } from "@/api/auth";
 import { toast } from "react-toastify";
 import axios from "axios";
+import { useMutation } from "@tanstack/react-query";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -17,22 +18,26 @@ const Login = () => {
   const { email, password, isFormValid } = useLoginForm();
   const { login } = useAuthContext();
 
-  const handleLogin = async () => {
-    try {
-      const res = await postLogin({
-        email: email.value,
-        password: password.value,
-      });
-      const data = res.data.data;
-      login({ authToken: data.authToken, email: data.email, name: data.name });
+  const loginMutation = useMutation({
+    mutationFn: postLogin,
+    onSuccess: (res) => {
+      login(res);
       navigate(from, { replace: true });
-    } catch (err) {
-      if (axios.isAxiosError(err)) {
-        if (err.response && err.response.status == 400) {
-          toast.error(err.response.data?.data?.message || "로그인 실패");
+    },
+    onError: (error) => {
+      if (axios.isAxiosError(error)) {
+        if (error.response && error.response.status === 400) {
+          toast.error(error.response.data?.data?.message || "로그인 실패");
         }
       }
-    }
+    },
+  });
+
+  const handleLogin = async () => {
+    loginMutation.mutate({
+      email: email.value,
+      password: password.value,
+    });
   };
 
   return (

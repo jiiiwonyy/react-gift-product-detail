@@ -19,12 +19,13 @@ import type { Receiver } from "@/schema/receiver";
 import type { OrderType } from "@/schema/order";
 import { getProudctSummary } from "@/api/products";
 import { useAuthContext } from "@/contexts/useAuthContext";
-import axios from "axios";
 import { toast } from "react-toastify";
 import { postOrder } from "@/api/order";
-import { useFetchData } from "@/hooks/useFetchData";
 import { LoadingSpinner } from "@/components/Common/LoadingSpinner";
 import Layout from "@/components/Common/Layout";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import axios from "axios";
+import { queryKeys } from "@/utils/queryKeys";
 
 const Order = () => {
   const { selectedCard, selectCard } = useCardSelection();
@@ -32,10 +33,29 @@ const Order = () => {
   const { user } = useAuthContext();
   const navigate = useNavigate();
 
-  const { data: item, loading } = useFetchData({
-    fetchFn: getProudctSummary,
-    initFetchParams: Number(productId),
+  const {
+    data: item,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: queryKeys.productId(Number(productId)),
+    queryFn: () => getProudctSummary(Number(productId)),
+    enabled: !!productId,
+    retry: false,
   });
+
+  useEffect(() => {
+    if (error) {
+      // error 객체가 존재하면 (에러가 발생하면)
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 404) {
+          navigate("/");
+        } else if (error.response?.status === 401) {
+          navigate("/login");
+        }
+      }
+    }
+  }, [error, navigate]);
 
   const {
     register,
@@ -49,6 +69,44 @@ const Order = () => {
     mode: "onSubmit",
   });
 
+  const mutation = useMutation({
+    mutationFn: postOrder,
+    onSuccess: (res, variables) => {
+      if (res.data.data.success) {
+        alert(
+          `주문 완료!\n상품: ${item?.name}\n수량: ${totalCount}\n보내는 사람: ${variables.ordererName}\n메시지: ${variables.message}`
+        );
+        navigate("/");
+      }
+    },
+  });
+
+  const [isReceiverModalOpen, setIsReceiverModalOpen] = useState(false);
+  const [receivers, setReceivers] = useState<Receiver[]>([]);
+  const [receiverError, setReceiverError] = useState(false);
+
+  const handleOrderSubmit = async (data: OrderType) => {
+    const hasNoReceivers = receivers.length < 1;
+    setReceiverError(hasNoReceivers);
+    if (hasNoReceivers) {
+      toast.error("받는 사람이 없습니다.");
+      return;
+    }
+
+    const payload = {
+      productId: Number(productId),
+      message: data.message,
+      messageCardId: selectedCard ? String(selectedCard.id) : "",
+      ordererName: data.senderName,
+      receivers: receivers.map((r) => ({
+        name: r.receiverName,
+        phoneNumber: r.receiverPhoneNumber,
+        quantity: r.itemCount ?? 1,
+      })),
+    };
+    mutation.mutate(payload);
+  };
+
   const handleSelectCard = (card: typeof selectedCard) => {
     selectCard(card!);
     setValue("message", card!.defaultTextMessage);
@@ -60,10 +118,6 @@ const Order = () => {
   };
 
   const hasUserEditedMessage = useRef(false);
-
-  const [isReceiverModalOpen, setIsReceiverModalOpen] = useState(false);
-  const [receivers, setReceivers] = useState<Receiver[]>([]);
-  const [receiverError, setReceiverError] = useState(false);
 
   const handleOpenReceiverModal = () => {
     setIsReceiverModalOpen(true);
@@ -93,54 +147,12 @@ const Order = () => {
     0
   );
   const totalPrice = totalCount * (item?.price ?? 0);
-  const handleOrderSubmit = async (data: OrderType) => {
-    const hasNoReceivers = receivers.length < 1;
-    setReceiverError(hasNoReceivers);
-    if (hasNoReceivers) {
-      toast.error("받는 사람이 없습니다.");
-      return;
-    }
-
-    const payload = {
-      productId: Number(productId),
-      message: data.message,
-      messageCardId: selectedCard ? String(selectedCard.id) : "",
-      ordererName: data.senderName,
-      receivers: receivers.map((r) => ({
-        name: r.receiverName,
-        phoneNumber: r.receiverPhoneNumber,
-        quantity: r.itemCount ?? 1,
-      })),
-    };
-
-    try {
-      const res = await postOrder(payload);
-      if (res.data.data.success) {
-        alert(
-          `주문 완료!\n상품: ${item?.name}\n수량: ${totalCount}\n보내는 사람: ${data.senderName}\n메시지: ${data.message}`
-        );
-        navigate("/");
-      }
-    } catch (err) {
-      if (axios.isAxiosError(err)) {
-        if (err.response) {
-          if (err.response.status === 401) {
-            toast.error("로그인이 필요합니다.");
-            navigate("/login");
-          } else if (err.response.status === 400) {
-            toast.error("유효성 검사 실패");
-            navigate("/");
-          }
-        }
-      }
-    }
-  };
 
   return (
     <Layout>
       <Header title="선물하기" />
-      {loading ? (
-        <LoadingSpinner color="#000000" loading={loading} size={35} />
+      {isLoading ? (
+        <LoadingSpinner color="#000000" loading={isLoading} size={35} />
       ) : (
         <OrderContainer
           onSubmit={handleSubmit(handleOrderSubmit, () =>
