@@ -36,7 +36,7 @@ export const getProducts = async (
 
 type ProductsDetailProps = {
   description: string;
-  announcement: {
+  announcements: {
     name: string;
     value: string;
     displayOrder: number;
