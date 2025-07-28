@@ -62,7 +62,7 @@ const RankingSection = () => {
         state: { from: { pathname: `/order/${productId}` } },
       });
     } else {
-      navigate(`/order/${productId}`);
+      navigate(`/product/${productId}`);
     }
   };
 

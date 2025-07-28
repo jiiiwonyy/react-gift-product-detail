@@ -69,7 +69,7 @@ const ThemeListSection = ({ themeId }: Props) => {
         state: { from: { pathname: `/order/${productId}` } },
       });
     } else {
-      navigate(`/order/${productId}`);
+      navigate(`/product/${productId}`);
     }
   };
 
