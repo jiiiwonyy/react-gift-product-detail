@@ -8,6 +8,7 @@ import { useParams } from "react-router-dom";
 
 const ProductDetail = () => {
   const { productId = "" } = useParams<{ productId: string }>();
+
   return (
     <Layout>
       <Header title="선물하기" />
