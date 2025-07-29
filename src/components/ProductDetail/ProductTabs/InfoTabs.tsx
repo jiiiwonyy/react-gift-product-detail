@@ -1,3 +1,5 @@
+import styled from "@emotion/styled";
+
 type AnnouncementsItem = {
   name: string;
   value: string;
@@ -10,7 +12,7 @@ type Props = {
 
 export default function InfoTab({ announcements }: Props) {
   if (!announcements || announcements.length === 0) {
-    return <p>상세 정보가 없습니다.</p>;
+    return;
   }
 
   const sorted = [...announcements].sort(
@@ -18,12 +20,45 @@ export default function InfoTab({ announcements }: Props) {
   );
 
   return (
-    <ul>
+    <InfoTabContainer>
       {sorted.map((item) => (
-        <li key={item.name}>
-          <strong>{item.name}</strong>: {item.value}
-        </li>
+        <InfoContainer key={item.name}>
+          <InfoName>{item.name}</InfoName>
+          <InfoContent> {item.value}</InfoContent>
+        </InfoContainer>
       ))}
-    </ul>
+    </InfoTabContainer>
   );
 }
+
+const InfoTabContainer = styled.ul`
+  margin-bottom: 5rem;
+  margin-top: 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`;
+
+const InfoContainer = styled.li`
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+`;
+
+const InfoName = styled.div`
+  ${({ theme }) => `
+    font-size: ${theme.font.subtitle2Bold.size};
+    font-weight: ${theme.font.subtitle2Bold.weight};
+    line-height: ${theme.font.subtitle2Bold.lineHeight};
+  `}
+`;
+
+const InfoContent = styled.p`
+  whitespace: pre-line;
+  ${({ theme }) => `
+    font-size: ${theme.font.body1Regular.size};
+    font-weight: ${theme.font.body1Regular.weight};
+    line-height: ${theme.font.body1Regular.lineHeight};
+  `}
+`;

@@ -31,6 +31,7 @@ const TabWrapper = styled.div`
   display: flex;
   border-bottom: 1px solid ${({ theme }) => theme.colors.borderDefault};
   background-color: ${({ theme }) => theme.colors.backgroundDefault};
+  width: 100%;
 `;
 
 const TabItem = styled.button<{ isActive: boolean }>`

@@ -38,12 +38,12 @@ const ProductImageSection = ({ productId }: Props) => {
   return (
     <>
       <ProductImage src={data?.imageURL}></ProductImage>
-      <SectionContainer>
+      <ProductInfoContainer>
         <SectionTitle>{data?.name}</SectionTitle>
         <ProductPrice>
           {data?.price.sellingPrice.toLocaleString()}원
         </ProductPrice>
-      </SectionContainer>
+      </ProductInfoContainer>
       <DivdierLine />
       <BrandInfoBox>
         <BrandIcon src={data?.brandInfo.imageURL} />
@@ -53,19 +53,24 @@ const ProductImageSection = ({ productId }: Props) => {
   );
 };
 
+const ProductInfoContainer = styled(SectionContainer)`
+  margin: 0.5rem 0;
+`;
 const ProductImage = styled.img`
   width: 100%;
 `;
 
 const ProductPrice = styled.div`
   ${({ theme }) => `
-    font-size: ${theme.font.subtitle1Bold.size};
-    font-weight: ${theme.font.subtitle1Bold.weight};
-    line-height: ${theme.font.subtitle1Bold.lineHeight};`}
+    font-size: ${theme.font.title1Bold.size};
+    font-weight: ${theme.font.title1Bold.weight};
+    line-height: ${theme.font.title1Bold.lineHeight};`}
+  margin-top: 4px;
 `;
 
 const DivdierLine = styled.div`
-  border: 1px solid ${({ theme }) => theme.colors.borderDefault};
+  border: 1px solid ${({ theme }) => theme.colors.gray300};
+  width: 100%;
 `;
 
 const BrandInfoBox = styled(SectionContainer)`
@@ -73,6 +78,7 @@ const BrandInfoBox = styled(SectionContainer)`
   flex-direction: row;
   align-items: center;
   gap: 8px;
+  margin: 0.5rem 0;
 `;
 
 const BrandIcon = styled.img`
