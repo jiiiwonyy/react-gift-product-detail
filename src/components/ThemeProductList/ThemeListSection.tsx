@@ -31,7 +31,7 @@ const ThemeListSection = ({ themeId }: Props) => {
     isFetchingNextPage,
     error,
   } = useInfiniteQuery<ThemeProductsResponse, AxiosError>({
-    queryKey: queryKeys.themeId(Number(themeId)),
+    queryKey: queryKeys.product.base(Number(themeId)),
     queryFn: ({ pageParam = 0 }) =>
       getThemesList({
         themeId: Number(themeId),

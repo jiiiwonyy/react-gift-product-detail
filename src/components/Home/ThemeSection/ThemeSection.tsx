@@ -6,10 +6,11 @@ import { LoadingSpinner } from "@/components/Common/LoadingSpinner";
 import { useNavigate } from "react-router-dom";
 import type { ThemeType } from "@/types/theme";
 import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "@/utils/queryKeys";
 
 const ThemeSection = () => {
   const { data, isLoading, isError } = useQuery<ThemeType[], void>({
-    queryKey: ["themes"],
+    queryKey: queryKeys.theme.list(),
     queryFn: getThemes,
   });
 

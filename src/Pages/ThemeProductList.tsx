@@ -13,7 +13,7 @@ const ThemeProductList = () => {
   const { themeId = "" } = useParams<{ themeId: string }>();
 
   const { data: themeInfo, isLoading: heroLoading } = useQuery({
-    queryKey: queryKeys.infiniteThemeId(Number(themeId)),
+    queryKey: queryKeys.theme.infiniteProducts(Number(themeId)),
     queryFn: () => getThemesDetail(Number(themeId)),
     enabled: !!themeId,
   });

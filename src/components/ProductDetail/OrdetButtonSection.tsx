@@ -17,7 +17,7 @@ const OrderButtonSection = ({ productId }: Props) => {
   const { user } = useAuthContext();
   const isLoggedIn = !!user;
 
-  const wishKey = queryKeys.productWish(Number(productId));
+  const wishKey = queryKeys.product.wish(Number(productId));
   const queryClient = useQueryClient();
 
   const { data: wishData } = useQuery({

@@ -38,7 +38,7 @@ const Order = () => {
     isLoading,
     error,
   } = useQuery({
-    queryKey: queryKeys.productId(Number(productId)),
+    queryKey: queryKeys.product.summary(Number(productId)),
     queryFn: () => getProudctSummary(Number(productId)),
     enabled: !!productId,
     retry: false,

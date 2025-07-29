@@ -2,7 +2,7 @@ import TargetCategory from "./TargetCategory";
 import RankingCategory from "./RankingCategory";
 import ProductItem from "@/components/Common/ProductItem";
 import styled from "@emotion/styled";
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import {
   SectionContainer,
   SectionTitle,
@@ -13,6 +13,7 @@ import { getRanking } from "@/api/products";
 import { LoadingSpinner } from "@/components/Common/LoadingSpinner";
 import { useQuery } from "@tanstack/react-query";
 import type { BasicGiftProduct } from "@/types/gift";
+import { queryKeys } from "@/utils/queryKeys";
 
 const RankingSection = () => {
   const [showAll, setShowAll] = useState(false);
@@ -30,14 +31,9 @@ const RankingSection = () => {
   const targetType = searchParams.get("targetType") || "ALL";
   const rankType = searchParams.get("rankType") || "MANY_WISH";
 
-  const rankingParams = useMemo(
-    () => ({ targetType, rankType }),
-    [targetType, rankType]
-  );
-
   const { data, isLoading, isError } = useQuery<BasicGiftProduct[]>({
-    queryKey: ["rankingData", rankingParams],
-    queryFn: () => getRanking(rankingParams),
+    queryKey: queryKeys.ranking(targetType, rankType),
+    queryFn: () => getRanking({ targetType, rankType }),
   });
 
   const handleGenderChange = (newTarget: string) => {

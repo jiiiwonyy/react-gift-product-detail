@@ -6,6 +6,7 @@ import ReviewTab from "./ProductTabs/ReviewTabs";
 import { getProductsDetail } from "@/api/products";
 import { useState } from "react";
 import { SectionContainer } from "../Common/SectionLayout";
+import { queryKeys } from "@/utils/queryKeys";
 
 type Props = {
   productId: string;
@@ -17,7 +18,7 @@ const ProductDescriptionSection = ({ productId }: Props) => {
   >("description");
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["productDetail", productId],
+    queryKey: queryKeys.product.detail(Number(productId)),
     queryFn: () => getProductsDetail(Number(productId)),
   });
 

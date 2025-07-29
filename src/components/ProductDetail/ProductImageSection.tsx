@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import axios from "axios";
 import { LoadingSpinner } from "../Common/LoadingSpinner";
 import styled from "@emotion/styled";
+import { queryKeys } from "@/utils/queryKeys";
 
 type Props = {
   productId: string;
@@ -14,7 +15,7 @@ const ProductImageSection = ({ productId }: Props) => {
   const navigate = useNavigate();
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["productId", productId],
+    queryKey: queryKeys.product.base(Number(productId)),
     queryFn: () => getProducts(Number(productId)),
     enabled: !!productId,
     retry: false,
