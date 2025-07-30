@@ -104,14 +104,7 @@ const ThemeListSection = ({ themeId }: Props) => {
           />
         ))}
       </ProudctList>
-      {hasNextPage && (
-        <LoadingSpinner
-          color="#000000"
-          loading={true}
-          size={35}
-          marginSize={0}
-        />
-      )}
+      {hasNextPage && <LoadingSpinner marginSize={0} />}
       <div ref={loaderRef} style={{ height: "20px" }} />
     </SectionContainer>
   );

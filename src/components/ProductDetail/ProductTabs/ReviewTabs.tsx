@@ -1,6 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { getProductsHighlight } from "@/api/products";
-import { LoadingSpinner } from "@/components/Common/LoadingSpinner";
 import styled from "@emotion/styled";
 
 type Props = {
@@ -8,19 +7,15 @@ type Props = {
 };
 
 export default function ReviewTab({ productId }: Props) {
-  const { data, isLoading, error } = useQuery({
+  const { data } = useSuspenseQuery({
     queryKey: ["productReviews", productId],
     queryFn: () => getProductsHighlight(Number(productId)),
   });
 
-  if (isLoading)
-    return <LoadingSpinner color="#000000" loading={isLoading} size={35} />;
-
-  if (error) return <p>후기 로딩 실패</p>;
-  if (data?.reviews.length === 0) return <p>아직 등록된 리뷰가 없어요.</p>;
+  if (data.reviews.length === 0) return <p>아직 등록된 리뷰가 없어요.</p>;
   return (
     <ReviewTabContainer>
-      {data?.reviews.map((review) => (
+      {data.reviews.map((review) => (
         <ReviewContainer key={review.id}>
           <ReviewerName>{review.authorName}</ReviewerName>
           <ReviewContent>{review.content}</ReviewContent>

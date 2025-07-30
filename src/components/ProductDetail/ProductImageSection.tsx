@@ -1,10 +1,6 @@
 import { SectionContainer, SectionTitle } from "../Common/SectionLayout";
-import { useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { getProducts } from "@/api/products";
-import { useEffect } from "react";
-import axios from "axios";
-import { LoadingSpinner } from "../Common/LoadingSpinner";
 import styled from "@emotion/styled";
 import { queryKeys } from "@/utils/queryKeys";
 
@@ -12,43 +8,25 @@ type Props = {
   productId: string;
 };
 const ProductImageSection = ({ productId }: Props) => {
-  const navigate = useNavigate();
-
-  const { data, isLoading, error } = useQuery({
+  const { data } = useSuspenseQuery({
     queryKey: queryKeys.product.base(Number(productId)),
     queryFn: () => getProducts(Number(productId)),
-    enabled: !!productId,
     retry: false,
   });
 
-  useEffect(() => {
-    if (error) {
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 404) {
-          navigate("/");
-        } else if (error.response?.status === 401) {
-          navigate("/login");
-        }
-      }
-    }
-  }, [error, navigate]);
-
-  if (isLoading)
-    return <LoadingSpinner color="#000000" loading={isLoading} size={35} />;
-
   return (
     <>
-      <ProductImage src={data?.imageURL}></ProductImage>
+      <ProductImage src={data.imageURL}></ProductImage>
       <ProductInfoContainer>
-        <SectionTitle>{data?.name}</SectionTitle>
+        <SectionTitle>{data.name}</SectionTitle>
         <ProductPrice>
-          {data?.price.sellingPrice.toLocaleString()}원
+          {data.price.sellingPrice.toLocaleString()}원
         </ProductPrice>
       </ProductInfoContainer>
       <DivdierLine />
       <BrandInfoBox>
-        <BrandIcon src={data?.brandInfo.imageURL} />
-        <BrandName>{data?.brandInfo.name}</BrandName>
+        <BrandIcon src={data.brandInfo.imageURL} />
+        <BrandName>{data.brandInfo.name}</BrandName>
       </BrandInfoBox>
     </>
   );
