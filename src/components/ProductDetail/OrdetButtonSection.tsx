@@ -12,6 +12,11 @@ type Props = {
   productId: string;
 };
 
+type WishData = {
+  isWished: boolean;
+  wishCount: number;
+};
+
 const OrderButtonSection = ({ productId }: Props) => {
   const navigate = useNavigate();
   const { user } = useAuthContext();
@@ -27,15 +32,11 @@ const OrderButtonSection = ({ productId }: Props) => {
   });
 
   const { mutate: toggleWish } = useMutation({
-    mutationFn: () =>
-      new Promise<void>((resolve) => {
-        setTimeout(() => resolve(), 0);
-      }),
-
+    mutationFn: () => getProductsWish(Number(productId)),
     onMutate: async () => {
       await queryClient.cancelQueries({ queryKey: wishKey });
 
-      const prev = queryClient.getQueryData<typeof wishData>(wishKey);
+      const prev = queryClient.getQueryData<WishData>(wishKey);
 
       if (!prev) return;
 
