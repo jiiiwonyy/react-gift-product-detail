@@ -2,32 +2,33 @@ import Header from "@/components/Common/Header";
 import Layout from "@/components/Common/Layout";
 import styled from "@emotion/styled";
 import { useParams } from "react-router-dom";
-import { getThemesDetail } from "@/api/themes";
 import { LoadingSpinner } from "@/components/Common/LoadingSpinner";
 import HeroBannerSection from "@/components/ThemeProductList/HeroBannerSection";
 import ThemeListSection from "@/components/ThemeProductList/ThemeListSection";
-import { useQuery } from "@tanstack/react-query";
-import { queryKeys } from "@/utils/queryKeys";
+import { ErrorBoundary } from "@/components/Common/ErrorBoundary";
+import { Suspense } from "react";
+import { ErrorFallback } from "@/components/Common/ErrorFallback";
 
 const ThemeProductList = () => {
   const { themeId = "" } = useParams<{ themeId: string }>();
-
-  const { data: themeInfo, isLoading: heroLoading } = useQuery({
-    queryKey: queryKeys.infiniteThemeId(Number(themeId)),
-    queryFn: () => getThemesDetail(Number(themeId)),
-    enabled: !!themeId,
-  });
 
   return (
     <Layout>
       <Header title="선물하기" />
       <ListContainer>
-        <HeroBannerSection themeInfo={themeInfo} />
-        {heroLoading ? (
-          <LoadingSpinner color="#000000" loading={heroLoading} size={35} />
-        ) : (
-          <ThemeListSection themeId={themeId} />
-        )}
+        <ErrorBoundary
+          fallbackRender={({ error }) => <ErrorFallback error={error} />}
+        >
+          <Suspense fallback={<LoadingSpinner />}>
+            <HeroBannerSection themeId={themeId} />
+          </Suspense>
+        </ErrorBoundary>
+
+        <ErrorBoundary fallbackRender={() => <></>}>
+          <Suspense fallback={<LoadingSpinner />}>
+            <ThemeListSection themeId={themeId} />
+          </Suspense>
+        </ErrorBoundary>
       </ListContainer>
     </Layout>
   );

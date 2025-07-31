@@ -5,7 +5,7 @@ import { SectionContainer } from "@/components/Common/SectionLayout";
 import CardList from "@/components/Order/CardList";
 import { useCardSelection } from "@/hooks/useCardSelection";
 import { useParams, useNavigate } from "react-router-dom";
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import ReceiverListModal from "@/components/Order/ReceiverListModal";
 import {
   InputWrapper,
@@ -21,11 +21,12 @@ import { getProudctSummary } from "@/api/products";
 import { useAuthContext } from "@/contexts/useAuthContext";
 import { toast } from "react-toastify";
 import { postOrder } from "@/api/order";
-import { LoadingSpinner } from "@/components/Common/LoadingSpinner";
 import Layout from "@/components/Common/Layout";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import axios from "axios";
+import { useSuspenseQuery, useMutation } from "@tanstack/react-query";
 import { queryKeys } from "@/utils/queryKeys";
+import { ErrorBoundary } from "@/components/Common/ErrorBoundary";
+import { ErrorFallback } from "@/components/Common/ErrorFallback";
+import { LoadingSpinner } from "@/components/Common/LoadingSpinner";
 
 const Order = () => {
   const { selectedCard, selectCard } = useCardSelection();
@@ -33,29 +34,11 @@ const Order = () => {
   const { user } = useAuthContext();
   const navigate = useNavigate();
 
-  const {
-    data: item,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: queryKeys.productId(Number(productId)),
+  const { data: item } = useSuspenseQuery({
+    queryKey: queryKeys.product.summary(Number(productId)),
     queryFn: () => getProudctSummary(Number(productId)),
-    enabled: !!productId,
     retry: false,
   });
-
-  useEffect(() => {
-    if (error) {
-      // error 객체가 존재하면 (에러가 발생하면)
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 404) {
-          navigate("/");
-        } else if (error.response?.status === 401) {
-          navigate("/login");
-        }
-      }
-    }
-  }, [error, navigate]);
 
   const {
     register,
@@ -151,9 +134,7 @@ const Order = () => {
   return (
     <Layout>
       <Header title="선물하기" />
-      {isLoading ? (
-        <LoadingSpinner color="#000000" loading={isLoading} size={35} />
-      ) : (
+      <Suspense fallback={<LoadingSpinner />}>
         <OrderContainer
           onSubmit={handleSubmit(handleOrderSubmit, () =>
             setReceiverError(receivers.length < 1)
@@ -233,28 +214,32 @@ const Order = () => {
             )}
           </SectionContainer>
           <Divider />
-          <SectionContainer>
-            <OrderSectionTitle>상품 정보</OrderSectionTitle>
-            <ItemWrapper>
-              <ItemImg src={item?.imageURL} />
-              <ItemTextInfoWrapper>
-                <ItemBrand>{item?.brandName}</ItemBrand>
-                <ItemName>{item?.name}</ItemName>
-                <ItemPrice>{item?.price.toLocaleString()}원</ItemPrice>
-              </ItemTextInfoWrapper>
-            </ItemWrapper>
-          </SectionContainer>
+          <ErrorBoundary
+            fallbackRender={({ error }) => <ErrorFallback error={error} />}
+          >
+            <SectionContainer>
+              <OrderSectionTitle>상품 정보</OrderSectionTitle>
+              <ItemWrapper>
+                <ItemImg src={item.imageURL} />
+                <ItemTextInfoWrapper>
+                  <ItemBrand>{item.brandName}</ItemBrand>
+                  <ItemName>{item.name}</ItemName>
+                  <ItemPrice>{item.price.toLocaleString()}원</ItemPrice>
+                </ItemTextInfoWrapper>
+              </ItemWrapper>
+            </SectionContainer>
+          </ErrorBoundary>
           <OrderButton type="submit">
             {totalPrice.toLocaleString()}원 주문하기
           </OrderButton>
         </OrderContainer>
-      )}
-      <ReceiverListModal
-        open={isReceiverModalOpen}
-        onClose={handleModalClose}
-        onAdd={handleModalAddOrEdit}
-        initialReceives={receivers}
-      />
+        <ReceiverListModal
+          open={isReceiverModalOpen}
+          onClose={handleModalClose}
+          onAdd={handleModalAddOrEdit}
+          initialReceives={receivers}
+        />
+      </Suspense>
     </Layout>
   );
 };

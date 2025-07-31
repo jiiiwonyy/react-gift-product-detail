@@ -1,11 +1,11 @@
-import styled from '@emotion/styled';
+import styled from "@emotion/styled";
 
 export const SectionContainer = styled.section`
   width: 100%;
   max-width: 720px;
-  padding: 0 ${({ theme }) => ` ${theme.spacing.spacing4}`};
+  padding: ${({ theme }) => ` ${theme.spacing.spacing2}`}
+    ${({ theme }) => ` ${theme.spacing.spacing4}`};
   background-color: ${({ theme }) => theme.colors.backgroundDefault};
-  margin-top: ${({ theme }) => theme.spacing.spacing2};
 `;
 
 export const SectionTitle = styled.p`

@@ -1,16 +1,24 @@
+import { getThemesDetail } from "@/api/themes";
 import styled from "@emotion/styled";
-import type { ThemeInfo } from "@/types/theme";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { queryKeys } from "@/utils/queryKeys";
 
 type Props = {
-  themeInfo?: ThemeInfo;
+  themeId: string;
 };
 
-const HeroBannerSection = ({ themeInfo }: Props) => {
+const HeroBannerSection = ({ themeId }: Props) => {
+  const { data: themeInfo } = useSuspenseQuery({
+    queryKey: queryKeys.theme.infiniteProducts(Number(themeId)),
+    queryFn: () => getThemesDetail(Number(themeId)),
+    retry: false,
+  });
+
   return (
-    <HeroBanner bgColor={themeInfo?.backgroundColor}>
-      <ThemeName>{themeInfo?.name}</ThemeName>
-      <ThemeTitle>{themeInfo?.title}</ThemeTitle>
-      <ThemeDescription>{themeInfo?.description}</ThemeDescription>
+    <HeroBanner bgColor={themeInfo.backgroundColor}>
+      <ThemeName>{themeInfo.name}</ThemeName>
+      <ThemeTitle>{themeInfo.title}</ThemeTitle>
+      <ThemeDescription>{themeInfo.description}</ThemeDescription>
     </HeroBanner>
   );
 };

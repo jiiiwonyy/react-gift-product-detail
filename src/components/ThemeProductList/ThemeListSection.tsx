@@ -31,7 +31,7 @@ const ThemeListSection = ({ themeId }: Props) => {
     isFetchingNextPage,
     error,
   } = useInfiniteQuery<ThemeProductsResponse, AxiosError>({
-    queryKey: queryKeys.themeId(Number(themeId)),
+    queryKey: queryKeys.product.base(Number(themeId)),
     queryFn: ({ pageParam = 0 }) =>
       getThemesList({
         themeId: Number(themeId),
@@ -69,7 +69,7 @@ const ThemeListSection = ({ themeId }: Props) => {
         state: { from: { pathname: `/order/${productId}` } },
       });
     } else {
-      navigate(`/order/${productId}`);
+      navigate(`/product/${productId}`);
     }
   };
 
@@ -104,14 +104,7 @@ const ThemeListSection = ({ themeId }: Props) => {
           />
         ))}
       </ProudctList>
-      {hasNextPage && (
-        <LoadingSpinner
-          color="#000000"
-          loading={true}
-          size={35}
-          marginSize={0}
-        />
-      )}
+      {hasNextPage && <LoadingSpinner marginSize={0} />}
       <div ref={loaderRef} style={{ height: "20px" }} />
     </SectionContainer>
   );

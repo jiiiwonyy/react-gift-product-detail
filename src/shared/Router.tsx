@@ -6,6 +6,7 @@ import MyPage from "@/Pages/MyPage";
 import LoginProtectedRoute from "@/shared/LoginProtectedRoute";
 import Order from "@/Pages/Order";
 import ThemeProductList from "@/Pages/ThemeProductList";
+import ProductDetail from "@/Pages/ProductDetail";
 
 const Router = () => {
   return (
@@ -17,6 +18,14 @@ const Router = () => {
         element={
           <LoginProtectedRoute>
             <MyPage />
+          </LoginProtectedRoute>
+        }
+      />
+      <Route
+        path="/product/:productId"
+        element={
+          <LoginProtectedRoute>
+            <ProductDetail />
           </LoginProtectedRoute>
         }
       />

@@ -3,7 +3,7 @@ import type { CSSProperties } from "react";
 
 type Props = {
   color?: string;
-  loading: boolean;
+  loading?: boolean;
   size?: number;
   marginSize?: number;
 };
@@ -11,7 +11,7 @@ type Props = {
 export const LoadingSpinner = ({
   color = "#000000",
   loading,
-  size,
+  size = 35,
   marginSize = 100,
 }: Props) => {
   const override: CSSProperties = {

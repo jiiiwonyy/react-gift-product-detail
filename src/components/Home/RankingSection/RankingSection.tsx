@@ -2,7 +2,7 @@ import TargetCategory from "./TargetCategory";
 import RankingCategory from "./RankingCategory";
 import ProductItem from "@/components/Common/ProductItem";
 import styled from "@emotion/styled";
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import {
   SectionContainer,
   SectionTitle,
@@ -10,9 +10,9 @@ import {
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useAuthContext } from "@/contexts/useAuthContext";
 import { getRanking } from "@/api/products";
-import { LoadingSpinner } from "@/components/Common/LoadingSpinner";
-import { useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import type { BasicGiftProduct } from "@/types/gift";
+import { queryKeys } from "@/utils/queryKeys";
 
 const RankingSection = () => {
   const [showAll, setShowAll] = useState(false);
@@ -30,14 +30,9 @@ const RankingSection = () => {
   const targetType = searchParams.get("targetType") || "ALL";
   const rankType = searchParams.get("rankType") || "MANY_WISH";
 
-  const rankingParams = useMemo(
-    () => ({ targetType, rankType }),
-    [targetType, rankType]
-  );
-
-  const { data, isLoading, isError } = useQuery<BasicGiftProduct[]>({
-    queryKey: ["rankingData", rankingParams],
-    queryFn: () => getRanking(rankingParams),
+  const { data } = useSuspenseQuery<BasicGiftProduct[]>({
+    queryKey: queryKeys.ranking(targetType, rankType),
+    queryFn: () => getRanking({ targetType, rankType }),
   });
 
   const handleGenderChange = (newTarget: string) => {
@@ -62,21 +57,9 @@ const RankingSection = () => {
         state: { from: { pathname: `/order/${productId}` } },
       });
     } else {
-      navigate(`/order/${productId}`);
+      navigate(`/product/${productId}`);
     }
   };
-
-  if (isError || data?.length === 0) {
-    return (
-      <ErrorMessage>
-        <>상품이 없습니다.</>
-      </ErrorMessage>
-    );
-  }
-
-  if (isLoading) {
-    return <LoadingSpinner color="#000000" loading={isLoading} size={35} />;
-  }
 
   return (
     <SectionContainer>
@@ -134,13 +117,4 @@ const MoreButton = styled.button`
   }
 
   margin-bottom: ${({ theme }) => theme.spacing.spacing4};
-`;
-
-const ErrorMessage = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  min-height: 300px;
-  backgorund-color: ${({ theme }) => theme.colors.backgroundDefault};
 `;

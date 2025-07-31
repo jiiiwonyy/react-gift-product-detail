@@ -5,6 +5,9 @@ import RankingSection from "@/components/Home/RankingSection/RankingSection";
 import { useAuthContext } from "@/contexts/useAuthContext";
 import ThemeSection from "@/components/Home/ThemeSection/ThemeSection";
 import Layout from "@/components/Common/Layout";
+import { Suspense } from "react";
+import { LoadingSpinner } from "@/components/Common/LoadingSpinner";
+import { ErrorBoundary } from "@/components/Common/ErrorBoundary";
 
 const Home = () => {
   const { user } = useAuthContext();
@@ -22,14 +25,22 @@ const Home = () => {
             </SelectFriendText>
           </SelectFriend>
         </SelectFriendSection>
-        <ThemeSection />
+        <ErrorBoundary fallbackRender={() => <></>}>
+          <Suspense fallback={<LoadingSpinner />}>
+            <ThemeSection />
+          </Suspense>
+        </ErrorBoundary>
         <CheerBannerSection>
           <CheerBanner>
             <CheerBannerLabel>카카오테크 캠퍼스 3기 여러분</CheerBannerLabel>
             <CheerBannerText>프론트엔드 2단계 과제 화이팅!🎉</CheerBannerText>
           </CheerBanner>
         </CheerBannerSection>
-        <RankingSection />
+        <ErrorBoundary fallbackRender={() => <></>}>
+          <Suspense fallback={<LoadingSpinner />}>
+            <RankingSection />
+          </Suspense>
+        </ErrorBoundary>
       </HomeContainer>
     </Layout>
   );
