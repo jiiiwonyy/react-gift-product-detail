@@ -11,7 +11,7 @@ type Props = {
 };
 
 export default function InfoTab({ announcements }: Props) {
-  if (!announcements || announcements.length === 0) {
+  if (announcements.length === 0) {
     return;
   }
 
