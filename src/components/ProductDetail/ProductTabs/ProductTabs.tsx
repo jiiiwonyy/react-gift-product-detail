@@ -1,28 +1,30 @@
 import styled from "@emotion/styled";
 
+const TAB_LIST = [
+  { key: "description", label: "상품설명" },
+  { key: "review", label: "선물후기" },
+  { key: "info", label: "상세정보" },
+] as const;
+
+type TabKey = (typeof TAB_LIST)[number]["key"];
+
 type Props = {
-  selected: "description" | "info" | "review";
-  onSelect: (tab: "description" | "info" | "review") => void;
+  selected: TabKey;
+  onSelect: (tab: TabKey) => void;
 };
 
 export default function ProductTabs({ selected, onSelect }: Props) {
   return (
     <TabWrapper>
-      <TabItem
-        isActive={selected === "description"}
-        onClick={() => onSelect("description")}
-      >
-        상품설명
-      </TabItem>
-      <TabItem
-        isActive={selected === "review"}
-        onClick={() => onSelect("review")}
-      >
-        선물후기
-      </TabItem>
-      <TabItem isActive={selected === "info"} onClick={() => onSelect("info")}>
-        상세정보
-      </TabItem>
+      {TAB_LIST.map(({ key, label }) => (
+        <TabItem
+          key={key}
+          isActive={selected === key}
+          onClick={() => onSelect(key)}
+        >
+          {label}
+        </TabItem>
+      ))}
     </TabWrapper>
   );
 }
