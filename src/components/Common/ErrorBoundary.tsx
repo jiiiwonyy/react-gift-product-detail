@@ -1,4 +1,3 @@
-// components/Common/ErrorBoundary.tsx
 import { Component, type ReactNode } from "react";
 
 type Props = {
