@@ -17,7 +17,7 @@ const ProductItem = ({
   onClick,
 }: ProductItemProps) => {
   return (
-    <ItemWrapper onClick={onClick}>
+    <ItemWrapper data-testid="product-item" onClick={onClick}>
       <ImageWrapper>
         <ProductImage src={imageURL} alt={name} />
         {rank !== undefined && (

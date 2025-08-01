@@ -20,6 +20,7 @@ const TargetCategory = ({ selected, onChange }: Props) => {
           <CategoryItemButton
             isActive={selected === value}
             onClick={() => onChange(value)}
+            data-testid={`target-tab-${value}`}
           >
             <CategoryIcon>{icon}</CategoryIcon>
           </CategoryItemButton>
