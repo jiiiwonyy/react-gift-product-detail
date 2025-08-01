@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { SectionContainer } from "../Common/SectionLayout";
 import { LoadingSpinner } from "../Common/LoadingSpinner";
-import ProductItem from "../Common/ProductItem";
+import ProductItem from "../Common/ProductItem/ProductItem";
 import styled from "@emotion/styled";
 import { getThemesList } from "@/api/themes";
 import type { BasicGiftProduct } from "@/types/gift";
